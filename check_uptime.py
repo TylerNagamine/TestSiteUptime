@@ -1,5 +1,6 @@
 import requests
 import json
+import time
 from datetime import datetime
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
@@ -16,7 +17,6 @@ def slack_message_on_error(func):
 		try:
 			func(driver)
 		except NoSuchElementException as err:
-			
 			error = json.loads(err.msg)
 			errorMessage = error["errorMessage"]
 			timestamp = datetime.now()
@@ -31,8 +31,11 @@ class LoginSmokeTests(object):
 	moodys_username_id = 'email'
 	moodys_password_id = 'password'
 
-	def __init__(self, driver):
-		self.driver = driver
+	def __init__(self):
+		self.driver = webdriver.PhantomJS()
+
+		self.driver.set_window_size(1024, 768)
+		self.driver.implicitly_wait(30)
 
 	@slack_message_on_error
 	def TestBbcLoginPage(self):
@@ -56,14 +59,22 @@ def main():
 	global slackUrl
 	slackUrl = ''
 
-	driver = webdriver.PhantomJS()
-	driver.set_window_size(1024, 768)
-	# driver.implicitly_wait(30)
+	print('\n{0}: Running tests...'.format(str(datetime.now())))
 
-	tests = LoginSmokeTests(driver)
-	tests.TestBbcLoginPage()
-	tests.TestFinagraphLoginPage()
-	tests.TestMarqLoginPage()
+	for i in range(0, 2):
+		tests = LoginSmokeTests()
+
+		print('	Test {0} of login pages.'.format(str(i + 1)), end='')
+		start_time = time.time()
+		tests.TestBbcLoginPage()
+		tests.TestFinagraphLoginPage()
+		tests.TestMarqLoginPage()
+		print('		...Complete.  Run time: {0} seconds.'.format(str(time.time() - start_time)))
+
+		if i == 0:
+			time.sleep(10)
+
+	print('{0}: Tests complete.\n'.format(str(datetime.now())))
 
 if __name__ == "__main__":
 	main()
