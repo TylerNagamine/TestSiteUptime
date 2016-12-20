@@ -30,6 +30,7 @@ class LoginSmokeTests(object):
 
 	moodys_username_id = 'email'
 	moodys_password_id = 'password'
+	marq_score_guage_id = 'score'
 
 	def __init__(self):
 		self.driver = webdriver.PhantomJS()
@@ -51,9 +52,18 @@ class LoginSmokeTests(object):
 
 	@slack_message_on_error
 	def TestMarqLoginPage(self):
-		self.driver.get("https://www.marqscore.com/login")
+		self.driver.get("https://qab.marqscore.com/login")
+		# self.driver.get("https://qab.test.marq.finagraph.com/login")
 		username_element = self.driver.find_element_by_id(self.moodys_username_id)
 		password_element = self.driver.find_element_by_id(self.moodys_password_id)
+
+		username_element.send_keys('')
+		password_element.send_keys('')
+
+		password_button = self.driver.find_element_by_css_selector('button[data-bind="click: login"]')
+		password_button.click()
+
+		score = self.driver.find_element_by_id(self.marq_score_guage_id)
 
 def main():
 	global slackUrl
@@ -70,9 +80,6 @@ def main():
 		tests.TestFinagraphLoginPage()
 		tests.TestMarqLoginPage()
 		print('		...Complete.  Run time: {0} seconds.'.format(str(time.time() - start_time)))
-
-		if i == 0:
-			time.sleep(10)
 
 	print('{0}: Tests complete.\n'.format(str(datetime.now())))
 
